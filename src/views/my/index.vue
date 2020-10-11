@@ -4,8 +4,8 @@
     <div v-if="user" class="header user-info">
       <div class="base-info">
         <div class="left">
-          <van-image class="avatar" src="https://img.yzcdn.cn/vant/cat.jpeg" round fit="cover" />
-          <span class="name">黑马头条号</span>
+          <van-image class="avatar" :src="userInfo.photo" round fit="cover" />
+          <span class="name">{{ userInfo.name }}</span>
         </div>
         <div class="right">
           <van-button size="mini" round to="/user/profile">编辑资料</van-button>
@@ -13,19 +13,19 @@
       </div>
       <div class="data-stats">
         <div class="data-item">
-          <span class="count">1</span>
+          <span class="count">{{ userInfo.art_count }}</span>
           <span class="text">头条</span>
         </div>
         <div class="data-item">
-          <span class="count">2</span>
+          <span class="count">{{ userInfo.follow_count }}</span>
           <span class="text">关注</span>
         </div>
         <div class="data-item">
-          <span class="count">3</span>
+          <span class="count">{{ userInfo.fans_count }}</span>
           <span class="text">粉丝</span>
         </div>
         <div class="data-item">
-          <span class="count">4</span>
+          <span class="count">{{ userInfo.like_count }}</span>
           <span class="text">获赞</span>
         </div>
       </div>
@@ -57,14 +57,27 @@
 
 <script>
 import { mapState } from 'vuex'
+import { getUserInfo } from '@/api/users'
 export default {
   name: 'myIndex',
+  data() {
+    return {
+      // 存储用户信息
+      userInfo: {}
+    }
+  },
+  created() {
+    if (this.user) {
+      this.getUser()
+    }
+  },
   methods: {
     // 退出登录功能
     onLogout() {
-      this.$dialog.confirm({
-        title: '确认退出登录吗？'
-      })
+      this.$dialog
+        .confirm({
+          title: '确认退出登录吗？'
+        })
         .then(() => {
           // on confirm
           this.$store.commit('setUser', null)
@@ -73,6 +86,16 @@ export default {
           // on cancel
           this.$toast('取消登录')
         })
+    },
+    // 获取用户信息
+    async getUser() {
+      try {
+        const { data: res } = await getUserInfo()
+        console.log(res)
+        this.userInfo = res.data
+      } catch (error) {
+        this.$toast('获取用户信息失败')
+      }
     }
   },
   computed: {
